@@ -60,7 +60,7 @@ local uptime = computer.uptime
 -- because of that, we must re-pushSignal when we use this, else things break badly
 local pull = computer.pullSignal
 local last_sleep = uptime()
-local function status(msg,i)
+local function status(msg,v,l)
   if gpu then
     local n = " "
     local p = "█"
@@ -69,11 +69,11 @@ local function status(msg,i)
       math.floor(h / 2) + 5,
       n:rep(math.floor((w - msg:len()) / 2)) .. msg .. n:rep(math.floor(w / 2 + msg:len()))
     )
-    if i then
+    if v then
       gpu.set(
         math.floor(w / 2) - 5,
         math.floor(h / 2) + 4,
-        "[" .. p:rep(math.floor(8 / #scripts * i)) .. n:rep(8 - math.floor(8 / #scripts * i)) .. "]"
+        "[" .. p:rep(math.floor(8 / l * v)) .. n:rep(8 - math.floor(8 / l * v)) .. "]"
       )
     end
   end
@@ -155,7 +155,7 @@ for _, file in ipairs(rom_invoke("list", "boot")) do
 end
 table.sort(scripts)
 for i = 1, #scripts do
-  status("Loading " .. scripts[i])
+  status("Loading " .. scripts[i], i, #scripts)
   dofile(scripts[i])
 end
 
