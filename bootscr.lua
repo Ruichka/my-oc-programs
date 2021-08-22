@@ -60,14 +60,22 @@ local uptime = computer.uptime
 -- because of that, we must re-pushSignal when we use this, else things break badly
 local pull = computer.pullSignal
 local last_sleep = uptime()
-local function status(msg)
+local function status(msg,i)
   if gpu then
     local n = " "
+    local p = "█"
     gpu.set(
       1,
       math.floor(h / 2) + 5,
       n:rep(math.floor((w - msg:len()) / 2)) .. msg .. n:rep(math.floor(w / 2 + msg:len()))
     )
+    if i then
+      gpu.set(
+        math.floor(w / 2) - 5,
+        math.floor(h / 2) + 4,
+        "[" .. p:rep(math.floor(8 / #scripts * i)) .. n:rep(8 - math.floor(8 / #scripts * i)) .. "]"
+      )
+    end
   end
   -- boot can be slow in some environments, protect from timeouts
   if uptime() - last_sleep > 1 then
@@ -85,7 +93,6 @@ status("Booting " .. _OSVERSION .. "...")
 
 -- Custom low-level dofile implementation reading from our ROM.
 local function dofile(file)
-  status("Loading " .. file)
   local program, reason = raw_loadfile(file)
   if program then
     local result = table.pack(pcall(program))
@@ -148,6 +155,7 @@ for _, file in ipairs(rom_invoke("list", "boot")) do
 end
 table.sort(scripts)
 for i = 1, #scripts do
+  status("Loading " .. scripts[i])
   dofile(scripts[i])
 end
 
